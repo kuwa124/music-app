@@ -1,27 +1,41 @@
 // axiosライブラリをインポートする
 import axios from "axios";
 
-// Spotify APIからアクセストークンを取得する非同期関数
-export const getToken = async () => {
-  // URLパラメータを作成する
-  const params = new URLSearchParams();
-  // grant_typeパラメータを設定する
-  params.append("grant_type", "client_credentials");
-  // client_idパラメータを環境変数から設定する
-  params.append("client_id", process.env.REACT_APP_SPOTIFY_CLIENT_ID);
-  // client_secretパラメータを環境変数から設定する
-  params.append("client_secret", process.env.REACT_APP_SPOTIFY_CLIENT_SECRET);
-
-  // Spotify APIにPOSTリクエストを送信する
-  const response = await axios.post(
-    "https://accounts.spotify.com/api/token", // リクエストURL
-    params, // リクエストボディ
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded", // Content-Typeヘッダーを設定する
+// SpotifyClientクラスを定義する
+class SpotifyClient {
+  // クラスメソッドで初期化処理を行う
+  static async initialize() {
+    // Spotifyの認証APIにPOSTリクエストを送信する
+    const response = await axios.post(
+      "https://accounts.spotify.com/api/token",
+      {
+        grant_type: "client_credentials", // 認証方式を指定
+        client_id: process.env.REACT_APP_SPOTIFY_CLIENT_ID, // クライアントIDを指定
+        client_secret: process.env.REACT_APP_SPOTIFY_CLIENT_SECRET, // クライアントシークレットを指定
       },
-    }
-  );
-  // レスポンスデータをコンソールに出力する
-  console.log(response.data);
-};
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded", // リクエストヘッダを設定
+        },
+      }
+    );
+
+    // SpotifyClientインスタンスを作成する
+    let spotify = new SpotifyClient();
+    // レスポンスからアクセストークンを取得し、インスタンスのtokenプロパティに設定する
+    spotify.token = response.data.access_token;
+    // インスタンスを返す
+    return spotify;
+  }
+
+  // テスト用のメソッド
+  test() {
+    // tokenプロパティの値をコンソールに出力する
+    console.log(this.token);
+  }
+}
+
+// SpotifyClientを初期化し、spotifyという変数に代入する
+const spotify = await SpotifyClient.initialize();
+// spotifyを外部からインポート可能にする
+export default spotify;
