@@ -29,9 +29,14 @@ class SpotifyClient {
   }
 
   // テスト用のメソッド
-  test() {
-    // tokenプロパティの値をコンソールに出力する
-    console.log(this.token);
+  async getPopularSongs() {
+    const response = await axios.get(
+      "https://api.spotify.com/v1/playlists/37i9dQZF1DX9vYRBO9gjDe/tracks",
+      {
+        headers: {Authorization: "Bearer " + this.token},  
+      }
+    );
+    return response.data;
   }
 }
 
