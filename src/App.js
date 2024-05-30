@@ -4,13 +4,23 @@ import { useEffect, useState } from "react";
 import { SongList } from "./components/Songlist";
 // Spotify APIを利用するためのspotifyモジュールをインポート
 import spotify from "./lib/spotify";
+import { useRef } from "react";
 
 // Appコンポーネントの定義
 export default function App() {
   // ローディング状態とその状態を設定するためのuseStateフック
-  const { isLoading, setIsLoading } = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   // 人気のある曲とその状態を設定するためのuseStateフック
-  const { popularSongs, setPopularSongs } = useState([]); 
+  const [popularSongs, setPopularSongs] = useState([]); 
+
+// isPlayの状態とその状態を更新するための関数をuseStateフックから取得
+// isPlayは現在の再生状態を示す(true = 再生中, false = 停止中)
+const [isPlay, setIsPlay] = useState(false);
+
+// selectedSongの状態とその状態を更新するための関数をuseStateフックから取得
+// selectedSongには現在選択されている曲の情報が格納される
+const [selectedSong, setSelectedSong] = useState();
+  const audioRef = useRef(null);
   // コンポーネントがマウントされた時に実行されるuseEffectフック
   useEffect(() => {
     // 人気のある曲を取得する関数を呼び出す
@@ -33,6 +43,22 @@ export default function App() {
     setIsLoading(false);
   };
 
+
+// 選択された曲を処理する非同期関数
+const handleSongSelected = async (song) => {
+  // 選択された曲をステートに設定する
+  setSelectedSong(song);
+  
+  // 選択された曲のプレビューURLをオーディオの参照に設定する
+  audioRef.current.src = song.preview_url;
+  
+  // オーディオを再生する
+  audioRef.current.play();
+  
+  // プレイ中のステートをtrueに設定する
+  setIsPlay(true);
+  };
+
   // アプリケーションのレイアウトを定義
   return (
     <div className="flex flex-col min-h-screen bg-gray-900 text-white">
@@ -43,9 +69,10 @@ export default function App() {
         <section>
           <h2 className="text-2xl font-semibold mb-5">Popular Songs</h2>
           {/* SongListコンポーネントを表示し、ローディング状態と人気のある曲を渡す */}
-          <SongList isLoading={isLoading} songs={popularSongs}></SongList>
+          <SongList isLoading={isLoading} songs={popularSongs} onSongSelected={handleSongSelected}></SongList>
         </section>
       </main>
+      <audio ref={audioRef}></audio>
     </div>
   );
 }
