@@ -5,6 +5,7 @@ import { SongList } from "./components/Songlist";
 // Spotify APIを利用するためのspotifyモジュールをインポート
 import spotify from "./lib/spotify";
 import { useRef } from "react";
+import { Player } from "./components/player";
 
 // Appコンポーネントの定義
 export default function App() {
@@ -51,12 +52,29 @@ const handleSongSelected = async (song) => {
   
   // 選択された曲のプレビューURLをオーディオの参照に設定する
   audioRef.current.src = song.preview_url;
+  playSong();
+};
   
-  // オーディオを再生する
-  audioRef.current.play();
-  
-  // プレイ中のステートをtrueに設定する
-  setIsPlay(true);
+  const playSong = () => {
+    // オーディオを再生する
+    audioRef.current.play();
+    // プレイ中のステートをtrueに設定する
+    setIsPlay(true);
+  };
+
+  const pauseSong = () => {
+    // オーディオを再生する
+    audioRef.current.pause();
+    // プレイ中のステートをtrueに設定する
+    setIsPlay(false);
+  };
+
+  const toggleSong = () => {
+    if (isPlay) {
+      pauseSong()
+    } else {
+      playSong()  
+    }
   };
 
   // アプリケーションのレイアウトを定義
@@ -69,10 +87,15 @@ const handleSongSelected = async (song) => {
         <section>
           <h2 className="text-2xl font-semibold mb-5">Popular Songs</h2>
           {/* SongListコンポーネントを表示し、ローディング状態と人気のある曲を渡す */}
-          <SongList isLoading={isLoading} songs={popularSongs} onSongSelected={handleSongSelected}></SongList>
+          <SongList
+            isLoading={isLoading}
+            songs={popularSongs}
+            onSongSelected={handleSongSelected}>
+          </SongList>
         </section>
       </main>
-      <audio ref={audioRef}></audio>
+      {selectedSong != null && <Player song={selectedSong} isPlay={isPlay} onButtonClick={toggleSong} />}
+      <audio ref={audioRef} />
     </div>
   );
 }
