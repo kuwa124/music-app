@@ -49,10 +49,15 @@ const [selectedSong, setSelectedSong] = useState();
 const handleSongSelected = async (song) => {
   // 選択された曲をステートに設定する
   setSelectedSong(song);
+
+  if (song.preview_url != null) {
+    // 選択された曲のプレビューURLをオーディオの参照に設定する
+    audioRef.current.src = song.preview_url;
+    playSong();
+  } else {
+    pauseSong();
+  }
   
-  // 選択された曲のプレビューURLをオーディオの参照に設定する
-  audioRef.current.src = song.preview_url;
-  playSong();
 };
   
   const playSong = () => {
