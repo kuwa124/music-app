@@ -38,6 +38,17 @@ class SpotifyClient {
     );
     return response.data;
   }
+
+  async searchSongs(keyword) {
+    const response = await axios.get(
+      "https://api.spotify.com/v1/search",
+      {
+        headers: { Authorization: "Bearer " + this.token },  
+        params:{q:keyword, type:"track" },
+      }
+    );
+    return response.data.traks;
+  }
 }
 
 // SpotifyClientを初期化し、spotifyという変数に代入する

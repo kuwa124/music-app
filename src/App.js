@@ -6,6 +6,7 @@ import { SongList } from "./components/Songlist";
 import spotify from "./lib/spotify";
 import { useRef } from "react";
 import { Player } from "./components/player";
+import { SearchInput } from "./components/SearchInput";
 
 // Appコンポーネントの定義
 export default function App() {
@@ -89,6 +90,7 @@ const handleSongSelected = async (song) => {
         <header className="flex justify-between items-center mb-10">
           <h1 className="text-4xl font-bold">Music App</h1>
         </header>
+        <SearchInput></SearchInput>
         <section>
           <h2 className="text-2xl font-semibold mb-5">Popular Songs</h2>
           {/* SongListコンポーネントを表示し、ローディング状態と人気のある曲を渡す */}
