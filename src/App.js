@@ -1,87 +1,103 @@
 // ReactからuseEffectとuseStateをインポート
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react'
 // SongListコンポーネントをインポート
-import { SongList } from "./components/Songlist";
+import { SongList } from './components/Songlist'
 // Spotify APIを利用するためのspotifyモジュールをインポート
-import spotify from "./lib/spotify";
-import { useRef } from "react";
-import { Player } from "./components/player";
-import { SearchInput } from "./components/SearchInput";
+import spotify from './lib/spotify'
+import { useRef } from 'react'
+import { Player } from './components/player'
+import { SearchInput } from './components/SearchInput'
 
 // Appコンポーネントの定義
 export default function App() {
   // ローディング状態とその状態を設定するためのuseStateフック
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false)
   // 人気のある曲とその状態を設定するためのuseStateフック
-  const [popularSongs, setPopularSongs] = useState([]); 
+  const [popularSongs, setPopularSongs] = useState([])
 
-// isPlayの状態とその状態を更新するための関数をuseStateフックから取得
-// isPlayは現在の再生状態を示す(true = 再生中, false = 停止中)
-const [isPlay, setIsPlay] = useState(false);
+  // isPlayの状態とその状態を更新するための関数をuseStateフックから取得
+  // isPlayは現在の再生状態を示す(true = 再生中, false = 停止中)
+  const [isPlay, setIsPlay] = useState(false)
 
-// selectedSongの状態とその状態を更新するための関数をuseStateフックから取得
-// selectedSongには現在選択されている曲の情報が格納される
-const [selectedSong, setSelectedSong] = useState();
-  const audioRef = useRef(null);
+  // selectedSongの状態とその状態を更新するための関数をuseStateフックから取得
+  // selectedSongには現在選択されている曲の情報が格納される
+  const [selectedSong, setSelectedSong] = useState()
+
+  const [keyword, setKeyword] = useState('')
+
+  const [searchedSong, setSearchedSong] = useState()
+
+  const audioRef = useRef(null)
+
+  const isSearchedResult = searchSongs != null;
   // コンポーネントがマウントされた時に実行されるuseEffectフック
   useEffect(() => {
     // 人気のある曲を取得する関数を呼び出す
-    fetchPopularSongs();
-  }, []);
+    fetchPopularSongs()
+  }, [])
 
   // 人気のある曲を取得する関数
-  const fetchPopularSongs = async () => { 
+  const fetchPopularSongs = async () => {
     // ローディング状態をtrueに設定
-    setIsLoading(true);
+    setIsLoading(true)
     // Spotify APIから人気のある曲を取得
-    const result = await spotify.getPopularSongs();
+    const result = await spotify.getPopularSongs()
     // 取得した曲の情報からトラック情報のみを抽出
     const popularSongs = result.items.map((item) => {
-      return item.track;
-    });
+      return item.track
+    })
     // 人気のある曲の状態を更新
-    setPopularSongs(popularSongs);
+    setPopularSongs(popularSongs)
     // ローディング状態をfalseに設定
-    setIsLoading(false);
-  };
-
-
-// 選択された曲を処理する非同期関数
-const handleSongSelected = async (song) => {
-  // 選択された曲をステートに設定する
-  setSelectedSong(song);
-
-  if (song.preview_url != null) {
-    // 選択された曲のプレビューURLをオーディオの参照に設定する
-    audioRef.current.src = song.preview_url;
-    playSong();
-  } else {
-    pauseSong();
+    setIsLoading(false)
   }
-  
-};
-  
+
+  // 選択された曲を処理する非同期関数
+  const handleSongSelected = async (song) => {
+    // 選択された曲をステートに設定する
+    setSelectedSong(song)
+
+    if (song.preview_url != null) {
+      // 選択された曲のプレビューURLをオーディオの参照に設定する
+      audioRef.current.src = song.preview_url
+      playSong()
+    } else {
+      pauseSong()
+    }
+  }
+
   const playSong = () => {
     // オーディオを再生する
-    audioRef.current.play();
+    audioRef.current.play()
     // プレイ中のステートをtrueに設定する
-    setIsPlay(true);
-  };
+    setIsPlay(true)
+  }
 
   const pauseSong = () => {
     // オーディオを再生する
-    audioRef.current.pause();
+    audioRef.current.pause()
     // プレイ中のステートをtrueに設定する
     setIsPlay(false);
-  };
+  }
 
   const toggleSong = () => {
     if (isPlay) {
-      pauseSong()
+      pauseSong();
     } else {
-      playSong()  
+      playSong();
     }
-  };
+  }
+
+  const handleInputChange = (e) => {
+    setKeyword(e.target.value);
+  }
+
+  const searchSongs = async () => {
+    setIsLoading(true);
+    const result = await spotify.searchSongs(keyword);
+    setSearchedSong(result.items);
+    setIsLoading(false);
+  }
 
   // アプリケーションのレイアウトを定義
   return (
@@ -90,19 +106,25 @@ const handleSongSelected = async (song) => {
         <header className="flex justify-between items-center mb-10">
           <h1 className="text-4xl font-bold">Music App</h1>
         </header>
-        <SearchInput></SearchInput>
+        <SearchInput onInputChange={handleInputChange} onSubmit={searchSongs}></SearchInput>
         <section>
-          <h2 className="text-2xl font-semibold mb-5">Popular Songs</h2>
+          <h2 className="text-2xl font-semibold mb-5">{isSearchedResult ? "Searched Results" : "Popular Songs"}</h2>
           {/* SongListコンポーネントを表示し、ローディング状態と人気のある曲を渡す */}
           <SongList
             isLoading={isLoading}
-            songs={popularSongs}
-            onSongSelected={handleSongSelected}>
-          </SongList>
+            songs={isSearchedResult ? searchSongs : popularSongs}
+            onSongSelected={handleSongSelected}
+          ></SongList>
         </section>
       </main>
-      {selectedSong != null && <Player song={selectedSong} isPlay={isPlay} onButtonClick={toggleSong} />}
+      {selectedSong != null && (
+        <Player
+          song={selectedSong}
+          isPlay={isPlay}
+          onButtonClick={toggleSong}
+        />
+      )}
       <audio ref={audioRef} />
     </div>
-  );
+  )
 }
