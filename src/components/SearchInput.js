@@ -18,8 +18,7 @@ export function SearchInput(props) {
       />
       {/* 検索ボタンを表示します。
           クラス名を使用して、スタイルを適用しています。
-          FontAwesomeIconコンポーネントを使用して、検索アイコンを表示しています。
-          クリックイベントをpropsで受け取ったonSubmit関数にバインドしています。 */}
+          FontAwesomeIconコンポーネントを使用して、検索アイコンを表示しています。 */}
       <button
         onClick={props.onSubmit}
         className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-r-lg'
