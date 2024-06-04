@@ -59,16 +59,14 @@ export default function App() {
 
     if (song.preview_url != null) {
       // 選択された曲のプレビューURLをオーディオの参照に設定する
-      audioRef.current.src = song.preview_url;
-      // 曲を再生する
-      playSong();
+      audioRef.current.src = song.preview_url
+      playSong()
     } else {
       // 曲を一時停止する
       pauseSong();
     }
   };
 
-  // 曲を再生する関数
   const playSong = () => {
     // オーディオを再生する
     audioRef.current.play();
