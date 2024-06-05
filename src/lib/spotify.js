@@ -42,11 +42,11 @@ class SpotifyClient {
   }
 
   // キーワードで曲を検索するメソッド
-  async searchSongs(keyword) {
+  async searchSongs(keyword, limit, offset) {
     // Spotifyの曲検索APIにGETリクエストを送信する
     const response = await axios.get('https://api.spotify.com/v1/search', {
       headers: { Authorization: 'Bearer ' + this.token }, // 認証トークンをヘッダに設定
-      params: { q: keyword, type: 'track' }, // 検索キーワードとタイプ（曲）をパラメータに設定
+      params: { q: keyword, type: 'track', limit, offset }, // 検索キーワードとタイプ（曲）をパラメータに設定
     });
     // レスポンスの曲データを返す
     return response.data.tracks;

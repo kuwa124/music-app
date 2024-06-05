@@ -10,7 +10,9 @@ import { useRef } from 'react';
 import { Player } from './components/player';
 // SearchInputコンポーネントをインポート
 import { SearchInput } from './components/SearchInput';
+import { Pagination } from './components/Pagination';
 
+const limit = 20;
 // Appコンポーネントの定義
 export default function App() {
   // ローディング状態とその状態を設定するためのuseStateフック
@@ -25,6 +27,8 @@ export default function App() {
   const [keyword, setKeyword] = useState('');
   // 検索結果の曲の状態とその状態を更新するための関数をuseStateフックから取得
   const [searchedSongs, setSearchedSongs] = useState();
+  
+  const [page, setPage] = useState(1);
   // オーディオ要素への参照を取得するためのuseRefフック
   const audioRef = useRef(null);
   // 検索結果が存在するかどうかを示すフラグ
@@ -100,16 +104,30 @@ export default function App() {
   };
 
   // 曲を検索する非同期関数
-  const searchSongs = async () => {
+  const searchSongs = async (page) => {
     // ローディング状態をtrueに設定
     setIsLoading(true);
+    const offset = parseInt(page) ? (parseInt(page) - 1)*limit : 0;
     // Spotify APIを使用して曲を検索する
-    const result = await spotify.searchSongs(keyword);
+    const result = await spotify.searchSongs(keyword, limit, offset);
     // 検索結果の曲をステートに設定する
     setSearchedSongs(result.items);
     // ローディング状態をfalseに設定
     setIsLoading(false);
   };
+
+  const moveToNext = async () => {
+    const nextPage = page + 1;
+    await searchSongs(nextPage);
+    setPage(nextPage);
+  };
+
+  const moveToPrev = async () => {
+    const prevPage = page - 1;
+    await searchSongs(prevPage);
+    setPage(prevPage);
+  };
+
 
   // アプリケーションのレイアウトを定義
   return (
@@ -134,6 +152,7 @@ export default function App() {
             songs={isSearchedResult ? searchedSongs : popularSongs}
             onSongSelected={handleSongSelected}
           ></SongList>
+          {isSearchedResult && <Pagination onPrev={moveToPrev} onNext={moveToNext}></Pagination>}
         </section>
       </main>
       {/* 選択された曲が存在する場合はPlayerコンポーネントを表示 */}
