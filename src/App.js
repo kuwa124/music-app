@@ -10,8 +10,10 @@ import { useRef } from 'react';
 import { Player } from './components/player';
 // SearchInputコンポーネントをインポート
 import { SearchInput } from './components/SearchInput';
+// Paginationコンポーネントをインポート
 import { Pagination } from './components/Pagination';
 
+// 1ページあたりの曲の数を定義
 const limit = 20;
 // Appコンポーネントの定義
 export default function App() {
@@ -27,7 +29,7 @@ export default function App() {
   const [keyword, setKeyword] = useState('');
   // 検索結果の曲の状態とその状態を更新するための関数をuseStateフックから取得
   const [searchedSongs, setSearchedSongs] = useState();
-  
+  // 現在のページ番号の状態とその状態を更新するための関数をuseStateフックから取得
   const [page, setPage] = useState(1);
   // オーディオ要素への参照を取得するためのuseRefフック
   const audioRef = useRef(null);
@@ -63,14 +65,16 @@ export default function App() {
 
     if (song.preview_url != null) {
       // 選択された曲のプレビューURLをオーディオの参照に設定する
-      audioRef.current.src = song.preview_url
-      playSong()
+      audioRef.current.src = song.preview_url;
+      // 曲を再生する
+      playSong();
     } else {
       // 曲を一時停止する
       pauseSong();
     }
   };
 
+  // 曲を再生する関数
   const playSong = () => {
     // オーディオを再生する
     audioRef.current.play();
@@ -107,7 +111,8 @@ export default function App() {
   const searchSongs = async (page) => {
     // ローディング状態をtrueに設定
     setIsLoading(true);
-    const offset = parseInt(page) ? (parseInt(page) - 1)*limit : 0;
+    // ページ番号からオフセットを計算
+    const offset = parseInt(page) ? (parseInt(page) - 1) * limit : 0;
     // Spotify APIを使用して曲を検索する
     const result = await spotify.searchSongs(keyword, limit, offset);
     // 検索結果の曲をステートに設定する
@@ -116,18 +121,25 @@ export default function App() {
     setIsLoading(false);
   };
 
+  // 次のページに移動する非同期関数
   const moveToNext = async () => {
+    // 次のページ番号を計算
     const nextPage = page + 1;
+    // 次のページの検索結果を取得
     await searchSongs(nextPage);
+    // ページ番号をステートに設定
     setPage(nextPage);
   };
 
+  // 前のページに移動する非同期関数
   const moveToPrev = async () => {
+    // 前のページ番号を計算
     const prevPage = page - 1;
+    // 前のページの検索結果を取得
     await searchSongs(prevPage);
+    // ページ番号をステートに設定
     setPage(prevPage);
   };
-
 
   // アプリケーションのレイアウトを定義
   return (
@@ -152,7 +164,10 @@ export default function App() {
             songs={isSearchedResult ? searchedSongs : popularSongs}
             onSongSelected={handleSongSelected}
           ></SongList>
-          {isSearchedResult && <Pagination onPrev={moveToPrev} onNext={moveToNext}></Pagination>}
+          {/* 検索結果が存在する場合はPaginationコンポーネントを表示 */}
+          {isSearchedResult && (
+            <Pagination onPrev={moveToPrev} onNext={moveToNext}></Pagination>
+          )}
         </section>
       </main>
       {/* 選択された曲が存在する場合はPlayerコンポーネントを表示 */}
