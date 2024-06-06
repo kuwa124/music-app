@@ -31,6 +31,10 @@ export default function App() {
   const [searchedSongs, setSearchedSongs] = useState();
   // 現在のページ番号の状態とその状態を更新するための関数をuseStateフックから取得
   const [page, setPage] = useState(1);
+
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrev, setHasPrev] = useState(false);
+  
   // オーディオ要素への参照を取得するためのuseRefフック
   const audioRef = useRef(null);
   // 検索結果が存在するかどうかを示すフラグ
@@ -115,6 +119,9 @@ export default function App() {
     const offset = parseInt(page) ? (parseInt(page) - 1) * limit : 0;
     // Spotify APIを使用して曲を検索する
     const result = await spotify.searchSongs(keyword, limit, offset);
+    setHasNext(result.next != null);
+    setHasPrev(result.previous != null);
+    console.log(result);
     // 検索結果の曲をステートに設定する
     setSearchedSongs(result.items);
     // ローディング状態をfalseに設定
@@ -166,7 +173,11 @@ export default function App() {
           ></SongList>
           {/* 検索結果が存在する場合はPaginationコンポーネントを表示 */}
           {isSearchedResult && (
-            <Pagination onPrev={moveToPrev} onNext={moveToNext}></Pagination>
+            <Pagination
+              onPrev={hasPrev ? moveToPrev : null}
+              onNext={hasNext ? moveToNext : null}
+            >
+            </Pagination>
           )}
         </section>
       </main>

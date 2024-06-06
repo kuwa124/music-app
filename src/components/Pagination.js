@@ -7,10 +7,12 @@ export function Pagination(props) {
             mt-8 // 上マージンを2rem（32px）に設定
             flex // 子要素を水平に並べるflexコンテナに設定
             justify-center // 子要素を中央に配置するflexアイテムに設定
-        `}>
+        `}
+    >
       {' '}
       {/* 前のページに移動するためのボタン */}
       <button
+        disabled={props.onPrev == null}
         // 前のページに移動するための関数を呼び出すonClickイベント
         onClick={props.onPrev}
         // ボタンのスタイル設定（未来的・無効時のスタイルも含む）
@@ -30,6 +32,7 @@ export function Pagination(props) {
       </button>
       {/* 次のページに移動するためのボタン */}
       <button
+        disabled={props.onNext == null}
         // 次のページに移動するための関数を呼び出すonClickイベント
         onClick={props.onNext}
         // ボタンのスタイル設定（未来的・無効時のスタイルも含む）
