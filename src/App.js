@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // SongListコンポーネントをインポート
 import { SongList } from './components/Songlist';
 // Spotify APIを利用するためのspotifyモジュールをインポート
-import spotify from './lib/spotify';
+import spotify from './services/spotifyService';
 // useRefフックをインポート
 import { useRef } from 'react';
 // Playerコンポーネントをインポート
@@ -12,9 +12,9 @@ import { Player } from './components/player';
 import { SearchInput } from './components/SearchInput';
 // Paginationコンポーネントをインポート
 import { Pagination } from './components/Pagination';
+// 定数をインポート
+import { SONGS_PER_PAGE, APP_NAME } from './utils/constants';
 
-// 1ページあたりの曲の数を定義
-const limit = 20;
 // Appコンポーネントの定義
 export default function App() {
   // ローディング状態とその状態を設定するためのuseStateフック
@@ -34,7 +34,7 @@ export default function App() {
 
   const [hasNext, setHasNext] = useState(false);
   const [hasPrev, setHasPrev] = useState(false);
-  
+
   // オーディオ要素への参照を取得するためのuseRefフック
   const audioRef = useRef(null);
   // 検索結果が存在するかどうかを示すフラグ
@@ -116,9 +116,9 @@ export default function App() {
     // ローディング状態をtrueに設定
     setIsLoading(true);
     // ページ番号からオフセットを計算
-    const offset = parseInt(page) ? (parseInt(page) - 1) * limit : 0;
+    const offset = parseInt(page) ? (parseInt(page) - 1) * SONGS_PER_PAGE : 0;
     // Spotify APIを使用して曲を検索する
-    const result = await spotify.searchSongs(keyword, limit, offset);
+    const result = await spotify.searchSongs(keyword, SONGS_PER_PAGE, offset);
     setHasNext(result.next != null);
     setHasPrev(result.previous != null);
     console.log(result);
@@ -153,7 +153,7 @@ export default function App() {
     <div className='flex flex-col min-h-screen bg-gray-900 text-white'>
       <main className='flex-1 p-8 mb-20'>
         <header className='flex justify-between items-center mb-10'>
-          <h1 className='text-4xl font-bold'>Music App</h1>
+          <h1 className='text-4xl font-bold'>{APP_NAME}</h1>
         </header>
         {/* 検索入力コンポーネントを表示 */}
         <SearchInput
@@ -176,8 +176,7 @@ export default function App() {
             <Pagination
               onPrev={hasPrev ? moveToPrev : null}
               onNext={hasNext ? moveToNext : null}
-            >
-            </Pagination>
+            ></Pagination>
           )}
         </section>
       </main>
