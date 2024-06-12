@@ -1,66 +1,68 @@
 // ReactからuseEffectとuseStateをインポート
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+
 // SongListコンポーネントをインポート
 import { SongList } from './components/Songlist';
+
 // Spotify APIを利用するためのspotifyモジュールをインポート
 import spotify from './services/spotifyService';
+
 // useRefフックをインポート
 import { useRef } from 'react';
+
 // Playerコンポーネントをインポート
 import { Player } from './components/player';
+
 // SearchInputコンポーネントをインポート
 import { SearchInput } from './components/SearchInput';
+
 // Paginationコンポーネントをインポート
 import { Pagination } from './components/Pagination';
+
 // 定数をインポート
 import { SONGS_PER_PAGE, APP_NAME } from './utils/constants';
+
+// usePopularSongsカスタムフックをインポート
+import { usePopularSongs } from './hooks/usePopularSongs';
 
 // Appコンポーネントの定義
 export default function App() {
   // ローディング状態とその状態を設定するためのuseStateフック
   const [isLoading, setIsLoading] = useState(false);
-  // 人気のある曲とその状態を設定するためのuseStateフック
-  const [popularSongs, setPopularSongs] = useState([]);
+
+  // usePopularSongsカスタムフックから人気の曲の状態とフラグを取得
+  const {
+    isLoading: popularSongsLoading, // 人気の曲の取得中のフラグ
+    popularSongs, // 人気の曲のデータ
+    setPopularSongs, // 人気の曲のデータを更新する関数
+  } = usePopularSongs();
+
   // 再生状態とその状態を更新するための関数をuseStateフックから取得
   const [isPlay, setIsPlay] = useState(false);
+
   // 選択された曲の状態とその状態を更新するための関数をuseStateフックから取得
   const [selectedSong, setSelectedSong] = useState();
+
   // 検索キーワードの状態とその状態を更新するための関数をuseStateフックから取得
   const [keyword, setKeyword] = useState('');
+
   // 検索結果の曲の状態とその状態を更新するための関数をuseStateフックから取得
   const [searchedSongs, setSearchedSongs] = useState();
+
   // 現在のページ番号の状態とその状態を更新するための関数をuseStateフックから取得
   const [page, setPage] = useState(1);
 
+  // 次のページが存在するかどうかのフラグとそのフラグを更新する関数
   const [hasNext, setHasNext] = useState(false);
+
+  // 前のページが存在するかどうかのフラグとそのフラグを更新する関数
   const [hasPrev, setHasPrev] = useState(false);
 
   // オーディオ要素への参照を取得するためのuseRefフック
   const audioRef = useRef(null);
+  
   // 検索結果が存在するかどうかを示すフラグ
   const isSearchedResult = searchedSongs != null;
-
-  // コンポーネントがマウントされた時に実行されるuseEffectフック
-  useEffect(() => {
-    // 人気のある曲を取得する関数を呼び出す
-    fetchPopularSongs();
-  }, []);
-
-  // 人気のある曲を取得する非同期関数
-  const fetchPopularSongs = async () => {
-    // ローディング状態をtrueに設定
-    setIsLoading(true);
-    // Spotify APIから人気のある曲を取得
-    const result = await spotify.getPopularSongs();
-    // 取得した曲の情報からトラック情報のみを抽出
-    const popularSongs = result.items.map((item) => {
-      return item.track;
-    });
-    // 人気のある曲の状態を更新
-    setPopularSongs(popularSongs);
-    // ローディング状態をfalseに設定
-    setIsLoading(false);
-  };
 
   // 選択された曲を処理する非同期関数
   const handleSongSelected = async (song) => {
