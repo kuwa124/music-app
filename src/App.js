@@ -7,9 +7,6 @@ import { SongList } from './components/Songlist';
 // Spotify APIを利用するためのspotifyモジュールをインポート
 import spotify from './services/spotifyService';
 
-// useRefフックをインポート
-import { useRef } from 'react';
-
 // Playerコンポーネントをインポート
 import { Player } from './components/player';
 
@@ -25,6 +22,9 @@ import { SONGS_PER_PAGE, APP_NAME } from './utils/constants';
 // usePopularSongsカスタムフックをインポート
 import { usePopularSongs } from './hooks/usePopularSongs';
 
+// useSongPlayerカスタムフックをインポート
+import { useSongPlayer } from './hooks/useSongPlayer';
+
 // Appコンポーネントの定義
 export default function App() {
   // ローディング状態とその状態を設定するためのuseStateフック
@@ -37,8 +37,15 @@ export default function App() {
     setPopularSongs, // 人気の曲のデータを更新する関数
   } = usePopularSongs();
 
-  // 再生状態とその状態を更新するための関数をuseStateフックから取得
-  const [isPlay, setIsPlay] = useState(false);
+  // useSongPlayerカスタムフックから再生状態、オーディオ要素への参照、曲の選択、再生、一時停止、切り替えの関数を取得
+  const {
+    isPlay,
+    audioRef,
+    handleSongSelected,
+    playSong,
+    pauseSong,
+    toggleSong,
+  } = useSongPlayer();
 
   // 選択された曲の状態とその状態を更新するための関数をuseStateフックから取得
   const [selectedSong, setSelectedSong] = useState();
@@ -58,54 +65,8 @@ export default function App() {
   // 前のページが存在するかどうかのフラグとそのフラグを更新する関数
   const [hasPrev, setHasPrev] = useState(false);
 
-  // オーディオ要素への参照を取得するためのuseRefフック
-  const audioRef = useRef(null);
-  
   // 検索結果が存在するかどうかを示すフラグ
   const isSearchedResult = searchedSongs != null;
-
-  // 選択された曲を処理する非同期関数
-  const handleSongSelected = async (song) => {
-    // 選択された曲をステートに設定する
-    setSelectedSong(song);
-
-    if (song.preview_url != null) {
-      // 選択された曲のプレビューURLをオーディオの参照に設定する
-      audioRef.current.src = song.preview_url;
-      // 曲を再生する
-      playSong();
-    } else {
-      // 曲を一時停止する
-      pauseSong();
-    }
-  };
-
-  // 曲を再生する関数
-  const playSong = () => {
-    // オーディオを再生する
-    audioRef.current.play();
-    // プレイ中のステートをtrueに設定する
-    setIsPlay(true);
-  };
-
-  // 曲を一時停止する関数
-  const pauseSong = () => {
-    // オーディオを一時停止する
-    audioRef.current.pause();
-    // プレイ中のステートをfalseに設定する
-    setIsPlay(false);
-  };
-
-  // 曲の再生/一時停止を切り替える関数
-  const toggleSong = () => {
-    if (isPlay) {
-      // 曲が再生中の場合は一時停止する
-      pauseSong();
-    } else {
-      // 曲が一時停止中の場合は再生する
-      playSong();
-    }
-  };
 
   // 検索入力の変更を処理する関数
   const handleInputChange = (e) => {
@@ -155,6 +116,7 @@ export default function App() {
     <div className='flex flex-col min-h-screen bg-gray-900 text-white'>
       <main className='flex-1 p-8 mb-20'>
         <header className='flex justify-between items-center mb-10'>
+          {/* アプリケーション名を表示 */}
           <h1 className='text-4xl font-bold'>{APP_NAME}</h1>
         </header>
         {/* 検索入力コンポーネントを表示 */}
@@ -163,7 +125,7 @@ export default function App() {
           onSubmit={searchSongs}
         ></SearchInput>
         <section>
-          {/* 検索結果が存在する場合は検索結果、そうでない場合は人気のある曲を表示 */}
+          {/* 検索結果が存在する場合は検索結果、そうでない場合は人気のある曲を表示するセクションタイトルを表示 */}
           <h2 className='text-2xl font-semibold mb-5'>
             {isSearchedResult ? 'Searched Results' : 'Popular Songs'}
           </h2>
