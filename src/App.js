@@ -11,7 +11,7 @@ import { Player } from './components/player';
 // SearchInputコンポーネントをインポート
 import { SearchInput } from './components/SearchInput';
 // Paginationコンポーネントをインポート
-import { Pagination } from './components/Pagination';
+import { Pagination } from './components/Pagination.jsx';
 
 // 1ページあたりの曲の数を定義
 const limit = 20;
