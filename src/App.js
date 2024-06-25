@@ -1,28 +1,27 @@
 // ReactからuseEffectとuseStateをインポート
 import { useEffect, useState } from 'react';
-// SongListコンポーネントをインポート
-import { SongList } from './components/Songlist';
+// SongListコンポーネントをインポート（ファイル名を修正）
+import { SongList } from './components/SongList';
 // Spotify APIを利用するためのspotifyモジュールをインポート
 import spotify from './lib/spotify';
-// useRefフックをインポート
-import { useRef } from 'react';
 // Playerコンポーネントをインポート
 import { Player } from './components/player';
 // SearchInputコンポーネントをインポート
 import { SearchInput } from './components/SearchInput';
 // Paginationコンポーネントをインポート
 import { Pagination } from './components/Pagination';
+// useAudioカスタムフックをインポート
+import { useAudio } from './hooks/useAudio';
 
 // 1ページあたりの曲の数を定義
 const limit = 20;
+
 // Appコンポーネントの定義
 export default function App() {
   // ローディング状態とその状態を設定するためのuseStateフック
   const [isLoading, setIsLoading] = useState(false);
   // 人気のある曲とその状態を設定するためのuseStateフック
   const [popularSongs, setPopularSongs] = useState([]);
-  // 再生状態とその状態を更新するための関数をuseStateフックから取得
-  const [isPlay, setIsPlay] = useState(false);
   // 選択された曲の状態とその状態を更新するための関数をuseStateフックから取得
   const [selectedSong, setSelectedSong] = useState();
   // 検索キーワードの状態とその状態を更新するための関数をuseStateフックから取得
@@ -32,11 +31,13 @@ export default function App() {
   // 現在のページ番号の状態とその状態を更新するための関数をuseStateフックから取得
   const [page, setPage] = useState(1);
 
+  // useAudioフックから必要な状態と関数を取得
+  const { isPlay, setIsPlay, audioRef, playSong, pauseSong } = useAudio();
+  // 次のページがあるかどうかの状態とその更新関数
   const [hasNext, setHasNext] = useState(false);
+  // 前のページがあるかどうかの状態とその更新関数
   const [hasPrev, setHasPrev] = useState(false);
-  
-  // オーディオ要素への参照を取得するためのuseRefフック
-  const audioRef = useRef(null);
+
   // 検索結果が存在するかどうかを示すフラグ
   const isSearchedResult = searchedSongs != null;
 
@@ -78,22 +79,6 @@ export default function App() {
     }
   };
 
-  // 曲を再生する関数
-  const playSong = () => {
-    // オーディオを再生する
-    audioRef.current.play();
-    // プレイ中のステートをtrueに設定する
-    setIsPlay(true);
-  };
-
-  // 曲を一時停止する関数
-  const pauseSong = () => {
-    // オーディオを一時停止する
-    audioRef.current.pause();
-    // プレイ中のステートをfalseに設定する
-    setIsPlay(false);
-  };
-
   // 曲の再生/一時停止を切り替える関数
   const toggleSong = () => {
     if (isPlay) {
@@ -119,8 +104,11 @@ export default function App() {
     const offset = parseInt(page) ? (parseInt(page) - 1) * limit : 0;
     // Spotify APIを使用して曲を検索する
     const result = await spotify.searchSongs(keyword, limit, offset);
+    // 次のページがあるかどうかを設定
     setHasNext(result.next != null);
+    // 前のページがあるかどうかを設定
     setHasPrev(result.previous != null);
+    // 検索結果をコンソールに出力（デバッグ用）
     console.log(result);
     // 検索結果の曲をステートに設定する
     setSearchedSongs(result.items);
@@ -176,8 +164,7 @@ export default function App() {
             <Pagination
               onPrev={hasPrev ? moveToPrev : null}
               onNext={hasNext ? moveToNext : null}
-            >
-            </Pagination>
+            ></Pagination>
           )}
         </section>
       </main>
