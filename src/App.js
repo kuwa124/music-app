@@ -1,67 +1,54 @@
-// ReactからuseEffectとuseStateをインポート
-import { useEffect, useState } from 'react';
+// ReactからuseStateをインポート
+import { useState } from 'react';
+
 // SongListコンポーネントをインポート（ファイル名を修正）
 import { SongList } from './components/SongList';
-// Spotify APIを利用するためのspotifyモジュールをインポート
-import spotify from './lib/spotify';
+
 // Playerコンポーネントをインポート
 import { Player } from './components/player';
+
 // SearchInputコンポーネントをインポート
 import { SearchInput } from './components/SearchInput';
+
 // Paginationコンポーネントをインポート
 import { Pagination } from './components/Pagination';
+
 // useAudioカスタムフックをインポート
 import { useAudio } from './hooks/useAudio';
 
-// 1ページあたりの曲の数を定義
-const limit = 20;
+// usePopularSongsカスタムフックをインポート
+import { usePopularSongs } from './hooks/usePopularSongs';
+
+// useSearchカスタムフックをインポート
+import { useSearch } from './hooks/useSearch';
 
 // Appコンポーネントの定義
 export default function App() {
-  // ローディング状態とその状態を設定するためのuseStateフック
-  const [isLoading, setIsLoading] = useState(false);
-  // 人気のある曲とその状態を設定するためのuseStateフック
-  const [popularSongs, setPopularSongs] = useState([]);
   // 選択された曲の状態とその状態を更新するための関数をuseStateフックから取得
   const [selectedSong, setSelectedSong] = useState();
-  // 検索キーワードの状態とその状態を更新するための関数をuseStateフックから取得
-  const [keyword, setKeyword] = useState('');
-  // 検索結果の曲の状態とその状態を更新するための関数をuseStateフックから取得
-  const [searchedSongs, setSearchedSongs] = useState();
-  // 現在のページ番号の状態とその状態を更新するための関数をuseStateフックから取得
-  const [page, setPage] = useState(1);
-
   // useAudioフックから必要な状態と関数を取得
-  const { isPlay, setIsPlay, audioRef, playSong, pauseSong } = useAudio();
-  // 次のページがあるかどうかの状態とその更新関数
-  const [hasNext, setHasNext] = useState(false);
-  // 前のページがあるかどうかの状態とその更新関数
-  const [hasPrev, setHasPrev] = useState(false);
+  const { isPlay, audioRef, playSong, pauseSong } = useAudio();
+
+  // usePopularSongsフックから必要な状態と関数を取得
+  const { isLoading: isLoadingPopular, popularSongs } = usePopularSongs();
+
+  // useSearchフックから必要な状態と関数を取得
+  const {
+    isLoading: isLoadingSearch,
+    searchedSongs,
+    setKeyword,
+    searchSongs,
+    hasNext,
+    hasPrev,
+    page,
+    setPage,
+  } = useSearch();
+
+  // 全体のローディング状態を計算
+  const isLoading = isLoadingPopular || isLoadingSearch;
 
   // 検索結果が存在するかどうかを示すフラグ
   const isSearchedResult = searchedSongs != null;
-
-  // コンポーネントがマウントされた時に実行されるuseEffectフック
-  useEffect(() => {
-    // 人気のある曲を取得する関数を呼び出す
-    fetchPopularSongs();
-  }, []);
-
-  // 人気のある曲を取得する非同期関数
-  const fetchPopularSongs = async () => {
-    // ローディング状態をtrueに設定
-    setIsLoading(true);
-    // Spotify APIから人気のある曲を取得
-    const result = await spotify.getPopularSongs();
-    // 取得した曲の情報からトラック情報のみを抽出
-    const popularSongs = result.items.map((item) => {
-      return item.track;
-    });
-    // 人気のある曲の状態を更新
-    setPopularSongs(popularSongs);
-    // ローディング状態をfalseに設定
-    setIsLoading(false);
-  };
 
   // 選択された曲を処理する非同期関数
   const handleSongSelected = async (song) => {
@@ -94,26 +81,6 @@ export default function App() {
   const handleInputChange = (e) => {
     // 検索キーワードをステートに設定する
     setKeyword(e.target.value);
-  };
-
-  // 曲を検索する非同期関数
-  const searchSongs = async (page) => {
-    // ローディング状態をtrueに設定
-    setIsLoading(true);
-    // ページ番号からオフセットを計算
-    const offset = parseInt(page) ? (parseInt(page) - 1) * limit : 0;
-    // Spotify APIを使用して曲を検索する
-    const result = await spotify.searchSongs(keyword, limit, offset);
-    // 次のページがあるかどうかを設定
-    setHasNext(result.next != null);
-    // 前のページがあるかどうかを設定
-    setHasPrev(result.previous != null);
-    // 検索結果をコンソールに出力（デバッグ用）
-    console.log(result);
-    // 検索結果の曲をステートに設定する
-    setSearchedSongs(result.items);
-    // ローディング状態をfalseに設定
-    setIsLoading(false);
   };
 
   // 次のページに移動する非同期関数

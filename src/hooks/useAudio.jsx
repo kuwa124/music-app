@@ -26,5 +26,5 @@ export const useAudio = () => {
   };
 
   // 必要な状態と関数をオブジェクトとして返す
-  return { isPlay, setIsPlay, audioRef, playSong, pauseSong };
+  return { isPlay, audioRef, playSong, pauseSong };
 };
