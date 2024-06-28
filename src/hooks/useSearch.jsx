@@ -3,6 +3,8 @@ import { useState } from 'react';
 // Spotify APIを利用するためのspotifyモジュールをインポート
 import spotify from '../lib/spotify';
 
+import { usePagination } from './useSelectedSong';
+
 export const useSearch = () => {
   // 1ページあたりの曲の数を定義
   const limit = 20;
@@ -16,6 +18,7 @@ export const useSearch = () => {
   const [hasNext, setHasNext] = useState(false);
   // 前のページがあるかどうかの状態とその更新関数
   const [hasPrev, setHasPrev] = useState(false);
+
   // 現在のページ番号の状態とその状態を更新するための関数をuseStateフックから取得
   const [page, setPage] = useState(1);
 
@@ -39,6 +42,26 @@ export const useSearch = () => {
     setIsLoading(false);
   };
 
+  // 次のページに移動する非同期関数
+  const moveToNext = async () => {
+    // 次のページ番号を計算
+    const nextPage = page + 1;
+    // 次のページの検索結果を取得
+    await searchSongs(nextPage);
+    // ページ番号をステートに設定
+    setPage(nextPage);
+  };
+
+  // 前のページに移動する非同期関数
+  const moveToPrev = async () => {
+    // 前のページ番号を計算
+    const prevPage = page - 1;
+    // 前のページの検索結果を取得
+    await searchSongs(prevPage);
+    // ページ番号をステートに設定
+    setPage(prevPage);
+  };
+
   return {
     isLoading,
     searchedSongs,
@@ -46,7 +69,7 @@ export const useSearch = () => {
     searchSongs,
     hasNext,
     hasPrev,
-    page,
-    setPage,
+    moveToNext,
+    moveToPrev,
   };
 };
