@@ -3,8 +3,6 @@ import { useState } from 'react';
 // Spotify APIを利用するためのspotifyモジュールをインポート
 import spotify from '../lib/spotify';
 
-import { usePagination } from './useSelectedSong';
-
 export const useSearch = () => {
   // 1ページあたりの曲の数を定義
   const limit = 20;

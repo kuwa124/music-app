@@ -4,7 +4,7 @@ import { useState } from 'react';
 // useAudioカスタムフックをインポート
 import { useAudio } from './hooks/useAudio';
 
-// SongListコンポーネントをインポート（ファイル名を修正）
+// SongListコンポーネントをインポート
 import { SongList } from './components/SongList';
 
 // Playerコンポーネントをインポート
@@ -22,6 +22,7 @@ import { usePopularSongs } from './hooks/usePopularSongs';
 // useSearchカスタムフックをインポート
 import { useSearch } from './hooks/useSearch';
 
+// useSelectedSongカスタムフックをインポート
 import { useSelectedSong } from './hooks/useSelectedSong';
 
 // Appコンポーネントの定義
