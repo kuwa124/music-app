@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useAudio } from './hooks/useAudio';
 
 // SongListコンポーネントをインポート
-import { SongList } from './components/SongList';
+import { SongList } from './components/SongList.jsx';
 
 // Playerコンポーネントをインポート
 import { Player } from './components/player';
@@ -14,7 +14,7 @@ import { Player } from './components/player';
 import { SearchInput } from './components/SearchInput';
 
 // Paginationコンポーネントをインポート
-import { Pagination } from './components/Pagination';
+import { Pagination } from './components/Pagination.jsx';
 
 // usePopularSongsカスタムフックをインポート
 import { usePopularSongs } from './hooks/usePopularSongs';
